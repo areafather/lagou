@@ -13,7 +13,7 @@ import (
 func RandTimeSleep(base int, random int)  {
 	rand.Seed(time.Now().UnixNano())
 	sleep := base + rand.Intn(random)
-	time.Sleep(time.Second * time.Duration(sleep))
+	time.Sleep(time.Microsecond * time.Duration(sleep))
 }
 
 func ExistPositions(path string, ext string) (positions []string, err error ){

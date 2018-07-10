@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/shawpo/lagouWordCloud/spider"
+	"github.com/shawpo/lagou/spider"
 	"net/url"
 	"os"
 	"strconv"
@@ -9,10 +9,10 @@ import (
 	"bytes"
 	"github.com/shawpo/sego"
 	"log"
-	"github.com/shawpo/lagouWordCloud/analysis"
+	"github.com/shawpo/lagou/analysis"
 	"github.com/manifoldco/promptui"
 	"fmt"
-	"github.com/shawpo/lagouWordCloud/utils"
+	"github.com/shawpo/lagou/utils"
 	ui "github.com/gizak/termui"
 )
 

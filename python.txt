@@ -24012,3 +24012,25 @@ PC版：http://www.sqkb.com
 3.工作时间：每天7.5小时，周末双休，节假日按国家规定执行；
 4.转正后提供五险一金，富有竞争力的薪酬水平和其他福利津贴；
         
+        • Minimum
+o Solid work experience in Python and related web framework knowledge, like Django/Flake
+o Skilled at least one of the database technology, like MySQL/SQL Server/Oracle/PostgreSQL, or NoSQL database like MongoDB
+o Familiar with REST APIs and the rest framework based on python
+• Plus
+o Experience with developing/testing/deploying micro-services is a big plus
+o Experience with JavaScript/Node.js is a good plus
+• Others
+o BS or equal education in computer science or related technical discipline
+o Proactive, Fast-learning, good communication and teamwork
+        
+        工作职责:
+1. 参与移动分析平台功能研发与维护
+2. 参与系统性能优化和改进
+3. 对移动数据获取并进行相应处理
+ 
+任职要求:
+1. 熟练使用 Python 语言，熟悉 Web 编程、网络编程(TCP/HTTP 协议),具有 linux 下编程经验和操作经验
+2. 熟悉 Mysql 数据库,能根据业务需求快速设计高效的数据库,数据库性能优化
+3. 熟悉 IO、多线程、集合等基础框架,熟悉分布式、缓存、消息、搜索等机制
+4. 熟悉常用的数据结构和算法,熟悉常见设计模式，有基于 Hadoop、Spark 的大数据处理经验更好
+        

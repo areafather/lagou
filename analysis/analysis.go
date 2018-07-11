@@ -1,29 +1,25 @@
 package analysis
 
 import (
-	"os"
-	"io/ioutil"
-	"regexp"
-	"github.com/shawpo/sego"
 	"bufio"
-	"log"
 	"fmt"
+	"io/ioutil"
+	"log"
+	"os"
+	"regexp"
+
+	"github.com/shawpo/lagou/params"
+	"github.com/shawpo/sego"
 )
 
-// 词库
-const ITDIC  = "dic/THUOCL_it.txt"
-// 同义词词库
-const SYNONYM = "dic/synonym.txt"
-// 过滤词库
-const FILTER  = "dic/filter.txt"
-
-func Analysis(path string, segment sego.Segmenter) (error, map[string]int) {
+// Analysis : do analysis
+func Analysis(path string, segment sego.Segmenter) (map[string]int, error) {
 	file, err := os.Open(path)
 
 	var wordsMap = make(map[string]int)
 
 	if err != nil {
-		return err, wordsMap
+		return wordsMap, err
 	}
 
 	contents, err := ioutil.ReadAll(file)
@@ -32,9 +28,9 @@ func Analysis(path string, segment sego.Segmenter) (error, map[string]int) {
 	// 获取分词结果slice
 	words := sego.SegmentsToSlice(segments, true)
 	// 获取过滤词典map
-	filterMap := FilterMap(FILTER)
+	filterMap := FilterMap(params.FILTER)
 	// 获取同义替换词典map
-	synonymMap := SynonymMap(SYNONYM)
+	synonymMap := SynonymMap(params.SYNONYM)
 	var word string
 	for _, word = range words {
 
@@ -61,10 +57,11 @@ func Analysis(path string, segment sego.Segmenter) (error, map[string]int) {
 		}
 	}
 
-	return err, wordsMap
+	return wordsMap, err
 }
 
-func SynonymMap(path string) (synonymMap map[string]string ){
+// SynonymMap : get SynonymMap from file
+func SynonymMap(path string) (synonymMap map[string]string) {
 	synonymMap = make(map[string]string)
 	synonymFile, err := os.Open(path)
 	defer synonymFile.Close()
@@ -91,7 +88,8 @@ func SynonymMap(path string) (synonymMap map[string]string ){
 	return
 }
 
-func FilterMap(path string) (filterMap map[string]bool ){
+// FilterMap : get FilterMap from file
+func FilterMap(path string) (filterMap map[string]bool) {
 	filterMap = make(map[string]bool)
 	filterFile, err := os.Open(path)
 	defer filterFile.Close()
@@ -118,7 +116,7 @@ func isValid(word string) bool {
 	length := len([]rune(word))
 
 	isEn, err := regexp.MatchString("\b[a-zA-Z]+\b", word)
-	if err != nil{
+	if err != nil {
 		return false
 	}
 
@@ -127,7 +125,7 @@ func isValid(word string) bool {
 		return false
 	}
 
-	if isEn || (length > 1 && !notWord ){
+	if isEn || (length > 1 && !notWord) {
 		return true
 	} else {
 		return false

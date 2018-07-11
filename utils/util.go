@@ -1,22 +1,24 @@
 package utils
 
 import (
-	"math/rand"
-	"time"
-	"path/filepath"
-	"os"
 	"fmt"
-	"strings"
 	"log"
+	"math/rand"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
 )
 
-func RandTimeSleep(base int, random int)  {
+// RandTimeSleep : sleep a random time
+func RandTimeSleep(base int, random int) {
 	rand.Seed(time.Now().UnixNano())
 	sleep := base + rand.Intn(random)
-	time.Sleep(time.Microsecond * time.Duration(sleep))
+	time.Sleep(time.Second * time.Duration(sleep))
 }
 
-func ExistPositions(path string, ext string) (positions []string, err error ){
+// ExistPositions : get Exist Positions from local
+func ExistPositions(path string, ext string) (positions []string, err error) {
 	files, err := filepath.Glob(fmt.Sprintf("%s/*%s", path, ext))
 	if err != nil {
 		return
@@ -31,7 +33,7 @@ func ExistPositions(path string, ext string) (positions []string, err error ){
 			continue
 		}
 
-		if !(fileInfo.Size() >0) {
+		if !(fileInfo.Size() > 0) {
 			continue
 		}
 

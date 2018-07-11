@@ -1,18 +1,18 @@
-package spider
+package request
 
 import (
-	"testing"
 	"io/ioutil"
 	"net/url"
+	"testing"
 )
 
 func TestDetailRequest(t *testing.T) {
-	positionId := 2735719
-	request, err := DetailRequest(positionId)
+	positionID := 2735719
+	request, err := DetailRequest(positionID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	resp, err := GetClient().Do(request)
+	resp, err := Fetch(request)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -27,16 +27,16 @@ func TestDetailRequest(t *testing.T) {
 }
 
 func TestKdPositionsRequest(t *testing.T) {
-	values:= url.Values{
+	values := url.Values{
 		"first": {"true"},
-		"pn" : {"1"},
-		"kd": {"go"},
+		"pn":    {"1"},
+		"kd":    {"go"},
 	}
-	request, err := KdPositionsRequest(values)
+	request, err := KdPositionRequest(values)
 	if err != nil {
 		t.Fatal(err)
 	}
-	resp, err := GetClient().Do(request)
+	resp, err := Fetch(request)
 	if err != nil {
 		t.Fatal(err)
 	}

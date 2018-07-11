@@ -1,28 +1,26 @@
 package main
 
 import (
-	"github.com/shawpo/lagouWordCloud/spider"
+	"fmt"
+	"log"
 	"net/url"
 	"os"
-	"strconv"
-	"io/ioutil"
-	"bytes"
-	"github.com/shawpo/sego"
-	"log"
-	"github.com/shawpo/lagouWordCloud/analysis"
-	"github.com/manifoldco/promptui"
-	"fmt"
-	"github.com/shawpo/lagouWordCloud/utils"
+
 	ui "github.com/gizak/termui"
+	"github.com/manifoldco/promptui"
+	"github.com/shawpo/lagou/analysis"
+	"github.com/shawpo/lagou/params"
+	"github.com/shawpo/lagou/spider/engine"
+	"github.com/shawpo/lagou/spider/handler"
+	"github.com/shawpo/lagou/spider/request"
+	"github.com/shawpo/lagou/spider/scheduler"
+	"github.com/shawpo/lagou/spider/types"
+	"github.com/shawpo/lagou/utils"
+	"github.com/shawpo/sego"
 )
 
-// 岗位数据后缀
-const POSITIONSEXT = ".txt"
-const TABLEPAGECOUNT  = 15
-var kd string
-
 func main() {
-	exists, err :=  utils.ExistPositions(".", POSITIONSEXT)
+	exists, err := utils.ExistPositions(".", params.POSITIONSEXT)
 	if len(exists) > 0 && err == nil {
 		selects := append(exists, "no")
 		prompt := promptui.Select{
@@ -30,15 +28,14 @@ func main() {
 			Items: selects,
 		}
 
-		_, kd, err = prompt.Run()
+		_, params.KD, err = prompt.Run()
 
 		if err != nil {
 			log.Fatalf("获取选择失败 %v\n", err)
 		}
 	}
-
-	if kd != "no" && kd != "" {
-		analysisKd(kd)
+	if params.KD != "no" && params.KD != "" {
+		analysisKd()
 		return
 	}
 
@@ -46,20 +43,42 @@ func main() {
 		Label: "输入岗位名称",
 	}
 
-	kd, err = prompt.Run()
+	params.KD, err = prompt.Run()
 
 	if err != nil {
 		log.Fatalf("获取岗位名称失败：%v\n", err)
 	}
-	getData(kd)
-	analysisKd(kd)
+	filePath := params.KD + params.POSITIONSEXT
+	_, err = os.Create(filePath)
+	if err != nil {
+		log.Fatalf("创建数据文件失败：%s\n", filePath)
+	}
+	e := &engine.Engine{
+		Scheduler:   scheduler.New(),
+		WorkerCount: params.WORKERCOUNT,
+	}
+	values := url.Values{
+		"first": {"true"},
+		"pn":    {"1"},
+		"kd":    {params.KD},
+	}
+	request, err := request.KdPositionRequest(values)
+	if err != nil {
+		log.Fatal(err)
+	}
+	task := types.Task{
+		Request: request,
+		Handler: handler.GetPosition,
+	}
+	e.Run(task)
+	analysisKd()
 }
 
-func analysisKd(kd string)  {
+func analysisKd() {
 	fmt.Println("--开始词频分析：")
 	var segment sego.Segmenter
-	segment.LoadDictionary(analysis.ITDIC)
-	err, wordsMap := analysis.Analysis(kd + POSITIONSEXT, segment)
+	segment.LoadDictionary(params.ITDIC)
+	wordsMap, err := analysis.Analysis(params.KD+params.POSITIONSEXT, segment)
 	var sum = len(wordsMap)
 	if err != nil {
 		log.Fatal(err)
@@ -71,7 +90,7 @@ func analysisKd(kd string)  {
 	displayRank(wordRands)
 }
 
-func displayRank(ranks utils.WordCountList)  {
+func displayRank(ranks utils.WordCountList) {
 	header := [][]string{
 		[]string{"关键词", "出现频次"},
 	}
@@ -82,9 +101,9 @@ func displayRank(ranks utils.WordCountList)  {
 		panic(err)
 	}
 	defer ui.Close()
-	var i, j = 0, 0+TABLEPAGECOUNT
+	var i, j = 0, 0 + params.TABLEPAGECOUNT
 	// 标题
-	p := ui.NewPar(fmt.Sprintf("%s职位关键词(总数%d):q退出，w向上翻页，s向下翻页", kd, sum))
+	p := ui.NewPar(fmt.Sprintf("%s职位关键词(总数%d):q退出，w向上翻页，s向下翻页", params.KD, sum))
 	p.Height = 3
 	p.Width = 60
 	p.TextFgColor = ui.ColorRed
@@ -92,7 +111,11 @@ func displayRank(ranks utils.WordCountList)  {
 	p.BorderFg = ui.ColorWhite
 
 	table := ui.NewTable()
-	table.Rows = append(header, ranks[i:j]...)
+	if len(ranks) > j {
+		table.Rows = append(header, ranks[i:j]...)
+	} else {
+		table.Rows = append(header, ranks...)
+	}
 	table.FgColor = ui.ColorYellow
 	table.Block.BorderFg = ui.ColorWhite
 	table.Separator = false
@@ -133,137 +156,29 @@ func displayRank(ranks utils.WordCountList)  {
 	})
 
 	ui.Handle("/sys/kbd/s", func(e ui.Event) {
-		if i+TABLEPAGECOUNT > sum{
+		if i+params.TABLEPAGECOUNT > sum {
 			render(i, j)
 			return
 		}
 
-		if j+TABLEPAGECOUNT > sum {
+		if j+params.TABLEPAGECOUNT > sum {
 			j = sum
-			i = i+TABLEPAGECOUNT
+			i = i + params.TABLEPAGECOUNT
 		} else {
-			i = i+TABLEPAGECOUNT
-			j = j+TABLEPAGECOUNT
+			i = i + params.TABLEPAGECOUNT
+			j = j + params.TABLEPAGECOUNT
 		}
 		render(i, j)
 
 	})
 	ui.Handle("/sys/kbd/w", func(e ui.Event) {
-		if j-TABLEPAGECOUNT < 0 || i-TABLEPAGECOUNT < 0{
+		if j-params.TABLEPAGECOUNT < 0 || i-params.TABLEPAGECOUNT < 0 {
 			render(i, j)
 			return
 		}
 		j = i
-		i = i-TABLEPAGECOUNT
+		i = i - params.TABLEPAGECOUNT
 		render(i, j)
 	})
 	ui.Loop()
-}
-
-
-func getData(kd string)  {
-	i := 1
-	sum := 0
-	first := "true"
-	positionsMap := make(map[int]string)
-	fmt.Println("--开始获取职位列表：")
-	for {
-		if i > 1 {
-			first = "false"
-			utils.RandTimeSleep(1, 2)
-		}
-		values:= url.Values{
-			"first": {first},
-			"pn" : {strconv.Itoa(i)},
-			"kd": {kd},
-		}
-		request, err := spider.KdPositionsRequest(values)
-		if err != nil {
-			log.Print(err)
-			continue
-		}
-		resp, err := spider.GetClient().Do(request)
-		if err != nil {
-			log.Print(err)
-			continue
-		}
-		positions ,err := spider.GetPositions(resp.Body)
-
-		if err != nil{
-			log.Print(err)
-			continue
-		}
-
-		if len(positions) == 0 {
-			break
-		}
-
-		for _, position := range positions {
-			fmt.Printf("----No.%d   %d: %s\n",sum, position.PositionID, position.PositionName)
-			positionsMap[position.PositionID] = position.PositionName
-			sum++
-		}
-		resp.Body.Close()
-		i++
-	}
-
-	filePath := kd + POSITIONSEXT
-
-	file, err := os.Create(filePath)
-
-	if err != nil {
-		log.Fatalf("can't create file %s to save data", filePath)
-	}
-
-	if len(positionsMap) == 0 {
-		log.Fatal("get none positions")
-	}
-
-	i = 1
-	fmt.Println("--开始获取职位详细数据：")
-	for positionId := range positionsMap {
-		utils.RandTimeSleep(1,2)
-		request, err := spider.DetailRequest(positionId)
-		if err != nil {
-			log.Print(err)
-			continue
-		}
-		client := spider.GetClient()
-		resp, err := client.Do(request)
-
-		html, err := ioutil.ReadAll(resp.Body)
-
-		if err !=nil {
-			log.Print(err)
-			continue
-		}
-		if resp.StatusCode != 200{
-			log.Printf("----PositionId %d: request error",
-				positionId)
-		}
-		detail ,err := spider.GetDetail(bytes.NewReader(html))
-
-		if detail == "" {
-
-			filePath := fmt.Sprintf("error-%s-%d.html", kd, positionId)
-			file, _ := os.Create(filePath)
-			file.Write(html)
-			log.Fatalf("PositionId %d: can't get detail, response has write in %s, maybe should update cookies",
-				positionId, filePath)
-		}
-		if err != nil{
-			log.Print(err)
-			continue
-		}
-		fmt.Printf("----Write position %d to file: %d of %d\n", positionId, i, len(positionsMap))
-		_, err = file.WriteString(detail)
-		if err != nil {
-			log.Print(err)
-			continue
-		}
-
-
-		resp.Body.Close()
-		i++
-	}
 }

@@ -1,6 +1,6 @@
 # lagou
 
-Golang编写的小工具，可以从拉勾网爬取指定岗位的职位内容信息，并支持对IT相关职位进行关键词词频分析排序，更方便的了解到岗位所需要技能。使用net/http标准库进行网络请求，方便拓展，可以方便的替换cookie。使用清华大学开放中文词库和基于[huichen/sego](https://github.com/huichen/sego)的分词器进行分词，支持可配置的词过滤，同义替换，支持自定义词典。使用[gizak/termui](https://github.com/gizak/termui)以表格的形式在命令行显示数据并支持分页。不依赖数据库等开发环境，方便使用，包含较为完备的单元测试。
+基于Channel和Goroutine实现的并发版golang爬虫，可以从拉勾网爬取指定岗位的职位内容信息，并支持对IT相关职位进行关键词词频分析排序，更方便的了解到岗位所需要技能。使用net/http标准库进行网络请求，方便拓展，可以方便的替换cookie。使用清华大学开放中文词库和基于[huichen/sego](https://github.com/huichen/sego)的分词器进行分词，支持可配置的词过滤，同义替换，支持自定义词典。使用[gizak/termui](https://github.com/gizak/termui)以表格的形式在命令行显示数据并支持分页。不依赖数据库等开发环境，方便使用，包含较为完备的单元测试。
 
 - 选择岗位
 ![选择岗位](http://www.shawpo.me/media/posts/lagou/lagoukdselect.png)

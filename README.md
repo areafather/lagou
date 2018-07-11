@@ -11,7 +11,7 @@ Golang编写的小工具，可以从拉勾网爬取指定岗位的职位内容�
 - 表格分页
 ![表格分页](http://www.shawpo.me/media/posts/lagou/lagoudispalypage.png)
 
-- cookie替换：浏览器打开拉勾网，登录后打开任意一个职位页面，在浏览器开发者工具中找到请求cookie，并用得到的cookie替换spider/request.go中的静态变量COOKIE。
+- cookie替换：浏览器打开拉勾网，登录后打开任意一个职位页面，在浏览器开发者工具中找到请求cookie，并用得到的cookie替换params/config.go中的静态变量COOKIE。
 ![cookie替换](http://www.shawpo.me/media/posts/lagou/lagoucookie.png)
 
 ### 运行
@@ -19,7 +19,7 @@ Golang编写的小工具，可以从拉勾网爬取指定岗位的职位内容�
 ```
 go get github.com/shawpo/lagou/...
 
-cd $GOPATH github.com/shawpo/lagou/
+cd $GOPATH/src/github.com/shawpo/lagou/
 
 go run main.go
 ```
@@ -37,6 +37,6 @@ go run main.go
 
 ### Todos
 
-- 支持并发，提高爬取速度
+- 支持IP代理池，提高爬取速度
 - 添加Web页面，显示词云
 - 支持其他招聘网站，对爬取结果进行整合后分析
